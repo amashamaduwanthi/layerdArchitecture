@@ -163,7 +163,7 @@ public class ManageCustomersFormController {
                 }
                 CustomerDTO dto=new CustomerDTO(id,name,address);
                 CustomerDAOImp customerDAOImp=new CustomerDAOImp();
-                boolean updateCustomer = customerDAOImp.updateCustomer(dto);
+                customerDAOImp.updateCustomer(dto);
 
             } catch (SQLException e) {
                 new Alert(Alert.AlertType.ERROR, "Failed to update the customer " + id + e.getMessage()).show();
@@ -196,15 +196,13 @@ public class ManageCustomersFormController {
             if (!existCustomer(id)) {
                 new Alert(Alert.AlertType.ERROR, "There is no such customer associated with the id " + id).show();
             }
-            Connection connection = DBConnection.getDbConnection().getConnection();
-            PreparedStatement pstm = connection.prepareStatement("DELETE FROM Customer WHERE id=?");
-            pstm.setString(1, id);
-            pstm.executeUpdate();
-
-            tblCustomers.getItems().remove(tblCustomers.getSelectionModel().getSelectedItem());
-            tblCustomers.getSelectionModel().clearSelection();
-            initUI();
-
+            CustomerDAOImp customerDAOImp=new CustomerDAOImp();
+            boolean deleteCustomer = customerDAOImp.deleteCustomer(id);
+             if(deleteCustomer) {
+                 tblCustomers.getItems().remove(tblCustomers.getSelectionModel().getSelectedItem());
+                 tblCustomers.getSelectionModel().clearSelection();
+                 initUI();
+                               }
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Failed to delete the customer " + id).show();
         } catch (ClassNotFoundException e) {
