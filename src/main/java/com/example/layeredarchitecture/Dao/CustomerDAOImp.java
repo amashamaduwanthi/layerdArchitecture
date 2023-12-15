@@ -6,10 +6,9 @@ import com.example.layeredarchitecture.model.CustomerDTO;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class CustomerDAOImp {
-    public CustomerDAOImp() throws SQLException, ClassNotFoundException {
-    }
+public class CustomerDAOImp implements CustomerDAO {
 
+@Override
     public ArrayList<CustomerDTO> getAllCustomer() throws SQLException, ClassNotFoundException {
         Connection connection = DBConnection.getDbConnection().getConnection();
         Statement stm = connection.createStatement();
@@ -21,6 +20,7 @@ public class CustomerDAOImp {
         }
         return getAllCustomerDto;
     }
+    @Override
    public boolean saveCustomer(String id, String name, String address) throws SQLException, ClassNotFoundException {
        Connection connection = DBConnection.getDbConnection().getConnection();
        PreparedStatement pstm = connection.prepareStatement("INSERT INTO Customer (id,name, address) VALUES (?,?,?)");
@@ -30,6 +30,7 @@ public class CustomerDAOImp {
        return pstm.executeUpdate()>0;
 
    }
+    @Override
    public boolean updateCustomer(CustomerDTO dto) throws SQLException, ClassNotFoundException {
        Connection connection = DBConnection.getDbConnection().getConnection();
        PreparedStatement pstm = connection.prepareStatement("UPDATE Customer SET name=?, address=? WHERE id=?");
@@ -38,12 +39,14 @@ public class CustomerDAOImp {
        pstm.setString(3, dto.getId());
        return pstm.executeUpdate()>0;
    }
+    @Override
    public boolean deleteCustomer(String id) throws SQLException, ClassNotFoundException {
        Connection connection = DBConnection.getDbConnection().getConnection();
        PreparedStatement pstm = connection.prepareStatement("DELETE FROM Customer WHERE id=?");
        pstm.setString(1, id);
        return  pstm.executeUpdate()>0;
    }
+    @Override
    public String generateNextId() throws SQLException, ClassNotFoundException {
        Connection connection = DBConnection.getDbConnection().getConnection();
        ResultSet rst = connection.createStatement().executeQuery("SELECT id FROM Customer ORDER BY id DESC LIMIT 1;");
@@ -57,7 +60,7 @@ public class CustomerDAOImp {
 
 
    }
-
+    @Override
 
     public boolean existCustomer(String id) throws SQLException, ClassNotFoundException {
         Connection connection = DBConnection.getDbConnection().getConnection();

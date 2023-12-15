@@ -1,5 +1,6 @@
 package com.example.layeredarchitecture.controller;
 
+import com.example.layeredarchitecture.Dao.CustomerDAO;
 import com.example.layeredarchitecture.Dao.CustomerDAOImp;
 import com.example.layeredarchitecture.db.DBConnection;
 import com.example.layeredarchitecture.model.CustomerDTO;
@@ -69,7 +70,7 @@ public class ManageCustomersFormController {
         tblCustomers.getItems().clear();
         /*Get all customers*/
         try {
-            CustomerDAOImp customerDAOImp = new CustomerDAOImp();
+            CustomerDAO customerDAOImp = new CustomerDAOImp();
             ArrayList<CustomerDTO> allCustomer = customerDAOImp.getAllCustomer();
             for(CustomerDTO dto:allCustomer){
                 tblCustomers.getItems().add(new CustomerTM(dto.getId(),dto.getName(),dto.getAddress()));
@@ -144,7 +145,7 @@ public class ManageCustomersFormController {
                 if (dao.existCustomer(id)) {
                     new Alert(Alert.AlertType.ERROR, id + " already exists").show();
                 }
-                CustomerDAOImp customerDAOImp = new CustomerDAOImp();
+                CustomerDAO customerDAOImp = new CustomerDAOImp();
                boolean saveCustomer= customerDAOImp.saveCustomer(id,name,address);
                if(saveCustomer) {
                    tblCustomers.getItems().add(new CustomerTM(id, name, address));
@@ -159,12 +160,12 @@ public class ManageCustomersFormController {
         } else {
             /*Update customer*/
             try {
-                CustomerDAOImp da=new CustomerDAOImp();
+                CustomerDAO da=new CustomerDAOImp();
                 if (!da.existCustomer(id)) {
                     new Alert(Alert.AlertType.ERROR, "There is no such customer associated with the id " + id).show();
                 }
                 CustomerDTO dto=new CustomerDTO(id,name,address);
-                CustomerDAOImp customerDAOImp=new CustomerDAOImp();
+                CustomerDAO customerDAOImp=new CustomerDAOImp();
                 customerDAOImp.updateCustomer(dto);
 
             } catch (SQLException e) {
@@ -195,11 +196,11 @@ public class ManageCustomersFormController {
         /*Delete Customer*/
         String id = tblCustomers.getSelectionModel().getSelectedItem().getId();
         try {
-           CustomerDAOImp dao= new CustomerDAOImp();
+           CustomerDAO dao= new CustomerDAOImp();
             if (!dao.existCustomer(id)) {
                 new Alert(Alert.AlertType.ERROR, "There is no such customer associated with the id " + id).show();
             }
-            CustomerDAOImp customerDAOImp=new CustomerDAOImp();
+            CustomerDAO customerDAOImp=new CustomerDAOImp();
             boolean deleteCustomer = customerDAOImp.deleteCustomer(id);
              if(deleteCustomer) {
                  tblCustomers.getItems().remove(tblCustomers.getSelectionModel().getSelectedItem());
@@ -215,7 +216,7 @@ public class ManageCustomersFormController {
 
     private String generateNewId() {
         try {
-            CustomerDAOImp customerDAOImp = new CustomerDAOImp();
+            CustomerDAO customerDAOImp = new CustomerDAOImp();
             return customerDAOImp.generateNextId();
 
         } catch (SQLException e) {
