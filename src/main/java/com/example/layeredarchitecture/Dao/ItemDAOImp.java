@@ -65,4 +65,46 @@ public class ItemDAOImp implements  ItemDAO{
         pstm.setString(1, code);
         return pstm.executeQuery().next();
     }
+
+    @Override
+    public ArrayList<ItemDTO> loadAllItemIDS() throws SQLException, ClassNotFoundException {
+        Connection connection = DBConnection.getDbConnection().getConnection();
+        Statement stm = connection.createStatement();
+        ResultSet rst = stm.executeQuery("SELECT * FROM Item");
+        ArrayList<ItemDTO>getAllItemCode=new ArrayList<>();
+        while (rst.next()){
+           ItemDTO dto= new ItemDTO(rst.getString("code"), rst.getString("description"), rst.getBigDecimal("unitPrice"),rst.getInt("qtyOnHand"));
+           getAllItemCode.add(dto);
+        }
+        return getAllItemCode;
+
+    }
+@Override
+    public boolean updateitem(ItemDTO item, Connection connection) throws SQLException {
+        PreparedStatement pstm = connection.prepareStatement("UPDATE Item SET description=?, unitPrice=?, qtyOnHand=? WHERE code=?");
+        pstm.setString(1, item.getDescription());
+        pstm.setBigDecimal(2, item.getUnitPrice());
+        pstm.setInt(3, item.getQtyOnHand());
+        pstm.setString(4, item.getCode());
+
+        if (!(pstm.executeUpdate() > 0)) {
+            connection.rollback();
+            connection.setAutoCommit(true);
+            return false;
+        }else{
+            connection.commit();
+            connection.setAutoCommit(true);
+            return true;
+    }
+    }
+    @Override
+    public ItemDTO FindItem(String newcode) throws SQLException, ClassNotFoundException {
+        Connection connection = DBConnection.getDbConnection().getConnection();
+        PreparedStatement pstm = connection.prepareStatement("SELECT * FROM Item WHERE code=?");
+        pstm.setString(1, newcode);
+        ResultSet rst = pstm.executeQuery();
+        rst.next();
+        ItemDTO dto= new ItemDTO(newcode, rst.getString("description"), rst.getBigDecimal("unitPrice"), rst.getInt("qtyOnHand"));
+        return dto;
+    }
 }

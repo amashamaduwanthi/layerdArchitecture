@@ -68,4 +68,17 @@ public class CustomerDAOImp implements CustomerDAO {
         pstm.setString(1, id);
         return pstm.executeQuery().next();
     }
+
+    @Override
+    public ArrayList<CustomerDTO> loadAllCustomerIDS() throws SQLException, ClassNotFoundException {
+        Connection connection = DBConnection.getDbConnection().getConnection();
+        Statement stm = connection.createStatement();
+        ResultSet rst = stm.executeQuery("SELECT * FROM Customer");
+        ArrayList<CustomerDTO>getAllCustomerIds=new ArrayList<>();
+        while(rst.next()){
+            CustomerDTO dto = new CustomerDTO(rst.getString("id"), rst.getString("name"), rst.getString("address"));
+            getAllCustomerIds.add(dto);
+        }
+           return getAllCustomerIds;
+    }
 }
