@@ -16,14 +16,14 @@ public class OrderDAOImp implements OrderDAO{
     }
     @Override
     public boolean saveOrder(String orderId, LocalDate orderDate, String customerId, Connection connection) throws SQLException {
-     PreparedStatement  stm = connection.prepareStatement("INSERT INTO `Orders` (oid, date, customerID) VALUES (?,?,?)");
+        PreparedStatement stm = connection.prepareStatement("INSERT INTO `Orders` (oid, date, customerID) VALUES (?,?,?)");
         stm.setString(1, orderId);
         stm.setDate(2, Date.valueOf(orderDate));
         stm.setString(3, customerId);
 
         if (stm.executeUpdate() != 1) {
-            connection.rollback();
-            connection.setAutoCommit(true);
+          //  connection.rollback();
+           // connection.setAutoCommit(true);
             return false;
         }else{
             return true;
@@ -35,10 +35,10 @@ public class OrderDAOImp implements OrderDAO{
         PreparedStatement stm = connection.prepareStatement("SELECT oid FROM `Orders` WHERE oid=?");
         stm.setString(1, orderId);
         if(stm.executeQuery().next()){
-            connection.setAutoCommit(false);
+           // connection.setAutoCommit(false);
             return true;
         }else{
-            connection.setAutoCommit(false);
+           // connection.setAutoCommit(false);
             return false;
         }
 

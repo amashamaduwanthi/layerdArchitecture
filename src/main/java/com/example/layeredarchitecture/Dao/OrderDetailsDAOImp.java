@@ -19,8 +19,8 @@ public class OrderDetailsDAOImp implements OrderDetailDAO{
             stm.setInt(4, detail.getQty());
         }
             if (stm.executeUpdate() != 1) {
-                connection.rollback();
-                connection.setAutoCommit(true);
+             //   connection.rollback();
+              //  connection.setAutoCommit(true);
                 return false;
             }else{
                 return true;

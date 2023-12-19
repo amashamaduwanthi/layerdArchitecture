@@ -321,13 +321,18 @@ public class PlaceOrderFormController {
         try {
            connection = DBConnection.getDbConnection().getConnection();
 
+
             boolean isExit = orderDAOImp.exitOrder(orderId, connection);
             if (isExit){
+                connection.setAutoCommit(false);
 
             }
+            connection.setAutoCommit(false);
 
             boolean isSaved = orderDAOImp.saveOrder(orderId, orderDate, customerId, connection);
             if(!isSaved){
+                connection.rollback();
+                connection.setAutoCommit(true);
                 return false;
             }
 
@@ -335,6 +340,8 @@ public class PlaceOrderFormController {
 
             /*if order id already exist*/
            if(!isOk) {
+               connection.rollback();
+               connection.setAutoCommit(true);
                return false;
            }
             //                //Search & Update Item
@@ -343,10 +350,14 @@ public class PlaceOrderFormController {
                 item.setQtyOnHand(item.getQtyOnHand() - detail.getQty());
                 boolean updateitem = itemDAOImp.updateitem(item, connection);
                if (!updateitem){
+                   connection.rollback();
+                   connection.setAutoCommit(true);
                    return false;
                }
 
             }
+            connection.commit();
+            connection.setAutoCommit(true);
            return true;
 
         } catch (SQLException throwables) {
