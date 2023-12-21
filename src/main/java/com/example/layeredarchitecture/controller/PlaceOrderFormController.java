@@ -1,11 +1,16 @@
 package com.example.layeredarchitecture.controller;
 
-import com.example.layeredarchitecture.Dao.*;
+import com.example.layeredarchitecture.Dao.custom.ItemDAO;
+import com.example.layeredarchitecture.Dao.custom.OrderDAO;
+import com.example.layeredarchitecture.Dao.custom.OrderDetailDAO;
+import com.example.layeredarchitecture.Dao.custom.impl.CustomerDAOImp;
+import com.example.layeredarchitecture.Dao.custom.impl.ItemDAOImp;
+import com.example.layeredarchitecture.Dao.custom.impl.OrderDAOImp;
+import com.example.layeredarchitecture.Dao.custom.impl.OrderDetailsDAOImp;
 import com.example.layeredarchitecture.db.DBConnection;
 import com.example.layeredarchitecture.model.CustomerDTO;
 import com.example.layeredarchitecture.model.ItemDTO;
 import com.example.layeredarchitecture.model.OrderDetailDTO;
-import com.example.layeredarchitecture.view.tdm.CustomerTM;
 import com.example.layeredarchitecture.view.tdm.OrderDetailTM;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
@@ -102,7 +107,7 @@ public class PlaceOrderFormController {
                     /*Search Customer*/
                     Connection connection = DBConnection.getDbConnection().getConnection();
                     try {
-                        if (!customerDAOImp.existCustomer(newValue + "")) {
+                        if (!customerDAOImp.exist(newValue + "")) {
 //                            "There is no such customer associated with the id " + id
                             new Alert(Alert.AlertType.ERROR, "There is no such customer associated with the id " + newValue + "").show();
                         }
@@ -137,7 +142,7 @@ public class PlaceOrderFormController {
 
                 /*Find Item*/
                 try {
-                    if (!itemDAOImp.existItem(newItemCode + "")) {
+                    if (!itemDAOImp.exist(newItemCode + "")) {
 //                        throw new NotFoundException("There is no such item associated with the id " + code);
                     }
                     Connection connection = DBConnection.getDbConnection().getConnection();
@@ -193,7 +198,7 @@ public class PlaceOrderFormController {
 
     public String generateNewOrderId() {
         try {
-            return  orderDAOImp.generateNextOrderId();
+            return  orderDAOImp.generateNextId();
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Failed to generate a new order id").show();
         } catch (ClassNotFoundException e) {
@@ -205,7 +210,7 @@ public class PlaceOrderFormController {
     private void loadAllCustomerIds() {
         try {
 
-            ArrayList<CustomerDTO> customerDTOS = customerDAOImp.loadAllCustomerIDS();
+            ArrayList<CustomerDTO> customerDTOS = customerDAOImp.getAll();
             for(CustomerDTO dto:customerDTOS){
                 cmbCustomerId.getItems().add(dto.getId());
             }
@@ -219,7 +224,7 @@ public class PlaceOrderFormController {
     private void loadAllItemCodes() {
         try {
             /*Get all items*/
-            ArrayList<ItemDTO> itemDTOS = itemDAOImp.loadAllItemIDS();
+            ArrayList<ItemDTO> itemDTOS = itemDAOImp.getAll();
             for (ItemDTO dto:itemDTOS){
                 cmbItemCode.getItems().add(dto.getCode());
             }
@@ -322,21 +327,21 @@ public class PlaceOrderFormController {
            connection = DBConnection.getDbConnection().getConnection();
 
 
-            boolean isExit = orderDAOImp.exitOrder(orderId, connection);
+            boolean isExit = orderDAOImp.exitOrder(orderId);
             if (isExit){
                 connection.setAutoCommit(false);
 
             }
             connection.setAutoCommit(false);
 
-            boolean isSaved = orderDAOImp.saveOrder(orderId, orderDate, customerId, connection);
+            boolean isSaved = orderDAOImp.saveOrder(orderId, orderDate, customerId);
             if(!isSaved){
                 connection.rollback();
                 connection.setAutoCommit(true);
                 return false;
             }
-
-            boolean isOk = orderDetailsDAOImp.saveOrderDetail(orderId, orderDetails, connection);
+            for (OrderDetailDTO detail:orderDetails){
+            boolean isOk = orderDetailsDAOImp.save(orderId,detail);
 
             /*if order id already exist*/
            if(!isOk) {
@@ -345,10 +350,10 @@ public class PlaceOrderFormController {
                return false;
            }
             //                //Search & Update Item
-           for (OrderDetailDTO detail:orderDetails){
+
                 ItemDTO item = findItem(detail.getItemCode());
                 item.setQtyOnHand(item.getQtyOnHand() - detail.getQty());
-                boolean updateitem = itemDAOImp.updateitem(item, connection);
+                boolean updateitem = itemDAOImp.update(item);
                if (!updateitem){
                    connection.rollback();
                    connection.setAutoCommit(true);
